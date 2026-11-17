@@ -12,7 +12,14 @@ log = logging.getLogger(__name__)
 
 router = Router(name="kick")
 
-_GROUP_TYPES = frozenset({"group", "supergroup"})
+_SUPERGROUP_ONLY_MSG = (
+    "⚠️ Это обычная группа. Telegram Bot API не даёт ботам "
+    "выгонять участников из basic group — только из супергрупп.\n\n"
+    "Как перевести: настройки чата → «Тип чата» → "
+    "«Перевести в супергруппу» (или добавь чат в любую папку / "
+    "выдай право «Закреплять сообщения» — Telegram сам мигрирует).\n"
+    "После миграции — повтори /kickall."
+)
 
 
 @router.message(Command("kickall"), IsAdmin())
@@ -21,8 +28,8 @@ async def cmd_kickall(
     bot: Bot,
     store: MemberStore,
 ) -> None:
-    if message.chat.type not in _GROUP_TYPES:
-        await message.answer("Команда работает только в группе или супергруппе.")
+    if message.chat.type != "supergroup":
+        await message.answer(_SUPERGROUP_ONLY_MSG)
         return
 
     await message.answer("Чищу…")
@@ -44,11 +51,10 @@ async def cmd_kickall(
 
 @router.chat_member()
 async def on_chat_member(update: ChatMemberUpdated, store: MemberStore) -> None:
-    """Cache new arrivals so a join is not lost before their first message."""
     user = update.new_chat_member.user
     if user.is_bot:
         return
-    if update.chat.type not in _GROUP_TYPES:
+    if update.chat.type != "supergroup":
         return
     try:
         await store.remember(update.chat.id, user.id)
