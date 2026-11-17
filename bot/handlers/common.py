@@ -10,9 +10,9 @@ router = Router(name="common")
 @router.message(Command("start"))
 async def cmd_start(message: Message) -> None:
     await message.answer(
-        "<b>kickbot</b>\n\n"
-        "/kickall — выгнать всех участников (кроме админов, тебя и бота)\n"
-        "/stats — сколько ID накоплено в базе",
+        "Добро пожаловать в <b>ChessIt</b>!\n\n"
+        "Введите /play и @username человека с которым хотите сыграть!\n"
+        "Приятной игры.",
         parse_mode="HTML",
     )
 
